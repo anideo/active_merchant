@@ -80,18 +80,27 @@ module ActiveMerchant #:nodoc:
       private
 
       def build_setup_request(action, money, options)
+        currency_code = options[:currency] || currency(money)
         xml = Builder::XmlMarkup.new :indent => 2
         xml.tag! 'SetExpressCheckoutReq', 'xmlns' => PAYPAL_NAMESPACE do
           xml.tag! 'SetExpressCheckoutRequest', 'xmlns:n2' => EBAY_NAMESPACE do
             xml.tag! 'n2:Version', API_VERSION
-            xml.tag! 'n2:SetExpressCheckoutRequestDetails' do            
+            xml.tag! 'n2:SetExpressCheckoutRequestDetails' do
               xml.tag! 'n2:BillingAgreementDetails' do
                 xml.tag! 'n2:BillingType', 'RecurringPayments'
                 xml.tag! 'n2:BillingAgreementDescription', options[:description]
               end
+
               xml.tag! 'n2:PaymentAction', action
-              xml.tag! 'n2:OrderTotal', amount(money).to_f.zero? ? amount(100) : amount(money), 'currencyID' => options[:currency] || currency(money)
-              xml.tag! 'n2:ItemTotal', amount(money).to_f.zero? ? amount(100) : amount(money), 'currencyID' => options[:currency] || currency(money)
+              xml.tag! 'n2:PaymentDetails' do
+                xml.tag! 'n2:OrderTotal', amount(money).to_f.zero? ? amount(100) : amount(money), 'currencyID' => currency_code
+                xml.tag! 'n2:ItemTotal', amount(money).to_f.zero? ? amount(100) : amount(money), 'currencyID' => currency_code
+                xml.tag! 'n2:PaymentDetailsItem' do
+                  xml.tag! 'n2:Description', options[:description]
+                  xml.tag! 'n2:Name', options[:name]
+                  xml.tag! 'n2:Amount', amount(money), 'currencyID' => currency_code
+                end
+              end
               xml.tag! 'n2:AddressOverride', '0'
               xml.tag! 'n2:NoShipping', '1'
               xml.tag! 'n2:ReturnURL', options[:return_url]
