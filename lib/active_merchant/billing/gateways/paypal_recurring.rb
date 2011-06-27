@@ -96,7 +96,7 @@ module ActiveMerchant #:nodoc:
                 xml.tag! 'n2:OrderTotal', amount(money).to_f.zero? ? amount(100) : amount(money), 'currencyID' => currency_code
                 xml.tag! 'n2:ItemTotal', amount(money).to_f.zero? ? amount(100) : amount(money), 'currencyID' => currency_code
                 xml.tag! 'n2:PaymentDetailsItem' do
-                  xml.tag! 'n2:Description', options[:description]
+                  xml.tag! 'n2:Description', options[:item_description]
                   xml.tag! 'n2:Name', options[:name]
                   xml.tag! 'n2:Amount', amount(money), 'currencyID' => currency_code
                 end
